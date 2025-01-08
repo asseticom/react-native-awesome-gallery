@@ -1,3 +1,26 @@
+import Animated, {
+  cancelAnimation,
+  runOnJS,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+  withDecay,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from 'react-native-gesture-handler';
+import {
+  I18nManager,
+  Image,
+  StyleSheet,
+  ViewStyle,
+  useWindowDimensions,
+} from 'react-native';
 import React, {
   useCallback,
   useEffect,
@@ -6,33 +29,10 @@ import React, {
   useState,
 } from 'react';
 import {
-  I18nManager,
-  Image,
-  StyleSheet,
-  useWindowDimensions,
-  ViewStyle,
-} from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useDerivedValue,
-  useSharedValue,
-  withTiming,
-  withDecay,
-  useAnimatedReaction,
-  runOnJS,
-  withSpring,
-  cancelAnimation,
-} from 'react-native-reanimated';
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
-import {
   clamp,
+  resizeImage,
   withDecaySpring,
   withRubberBandClamp,
-  resizeImage,
 } from './utils';
 
 const rtl = I18nManager.isRTL;
@@ -140,7 +140,20 @@ const springConfig = {
   restSpeedThreshold: 4,
 };
 
-type ItemRef = { reset: (animated: boolean) => void };
+type MoveToPointProps = {
+  x: number;
+
+  y: number;
+
+  scale?: number;
+
+  autoScale?: boolean;
+};
+
+type ItemRef = {
+  reset: (animated: boolean) => void;
+  moveToPoint: ({ x, y, scale, autoScale }: MoveToPointProps) => void;
+};
 
 const ResizableImage = React.memo(
   <T extends any>({
@@ -256,6 +269,74 @@ const ResizableImage = React.memo(
       return [-point, point];
     };
 
+    const checkBounds = ({ x, y, scale: newScale }: MoveToPointProps) => {
+      const posX = CENTER.x - x;
+
+      const posY = CENTER.y - y;
+
+      const toScale = newScale || scale.value;
+
+      const scaledWidth = layout.x.value * toScale;
+
+      const scaledHeight = layout.y.value * toScale;
+
+      const scaledPosX = posX * toScale;
+
+      const scaledPosY = posY * toScale;
+
+      const oobX = scaledWidth - scaledPosX * 2 < CENTER.x * 2;
+
+      const oobY = scaledHeight - scaledPosY * 2 < CENTER.y * 2;
+
+      return { oobX, oobY, posX, posY, scaledPosX, scaledPosY };
+    };
+
+    const moveToPoint = ({
+      x,
+
+      y,
+
+      scale: newScale,
+
+      autoScale = true,
+    }: MoveToPointProps) => {
+      'worklet';
+
+      const toScale = newScale || scale.value;
+
+      const { oobX, oobY, posX, posY, scaledPosX, scaledPosY } = checkBounds({
+        x,
+
+        y,
+
+        scale: toScale,
+      });
+
+      while (autoScale && (oobX || oobY)) {
+        moveToPoint({ x, y, scale: toScale + 0.5 });
+
+        return;
+      }
+
+      scale.value = withTiming(toScale);
+
+      if (!oobX) {
+        translation.x.value = withTiming(posX);
+
+        translation.x.value = withTiming(scaledPosX);
+
+        offset.x.value = withTiming(0);
+      }
+
+      if (!oobY) {
+        translation.y.value = withTiming(posY);
+
+        translation.y.value = withTiming(scaledPosY);
+
+        offset.y.value = withTiming(0);
+      }
+    };
+
     const clampY = (value: number, newScale: number) => {
       'worklet';
       const newHeight = newScale * layout.y.value;
@@ -347,6 +428,7 @@ const ResizableImage = React.memo(
     useEffect(() => {
       setRef(index, {
         reset: (animated: boolean) => resetValues(animated),
+        moveToPoint,
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [index]);
@@ -902,6 +984,7 @@ const ResizableImage = React.memo(
 export type GalleryRef = {
   setIndex: (newIndex: number, animated?: boolean) => void;
   reset: (animated?: boolean) => void;
+  moveToPoint: ({ x, y, scale, autoScale }: MoveToPointProps) => void;
 };
 
 export type GalleryReactRef = React.Ref<GalleryRef>;
@@ -1019,6 +1102,17 @@ const GalleryComponent = <T extends any>(
     },
     reset(animated = false) {
       refs.current?.forEach((itemRef) => itemRef.reset(animated));
+    },
+    moveToPoint({ x, y, scale, autoScale }) {
+      refs.current?.[currentIndex.value].moveToPoint({
+        x,
+
+        y,
+
+        scale,
+
+        autoScale,
+      });
     },
   }));
 
