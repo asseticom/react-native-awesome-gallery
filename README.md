@@ -1,3 +1,5 @@
+<h1>ADDED a `moveToPoint` function, which is not in the original library</h1>
+
 [![npm version](https://badge.fury.io/js/react-native-awesome-gallery.svg)](https://badge.fury.io/js/react-native-awesome-gallery)
 
 ## Support
@@ -71,7 +73,7 @@ return (
 ## Props
 
 | Prop                             | Description                                                                                                                                                                     | Type                                                                                             | Default                                                                |
-|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
 | data                             | Array of items to render                                                                                                                                                        | `T[]`                                                                                            | `undefined`                                                            |
 | renderItem?                      | Callback func which can be used to render custom image component, e.g `FastImage`. NOTE: You have to call `setImageDimensions({width, height})` parameter after image is loaded | `(renderItemInfo: {item: T, index: number, setImageDimensions: Function}) => React.ReactElement` | `undefined`                                                            |
 | keyExtractor?                    | Callback func which provides unique keys for items                                                                                                                              | `(item: T, index: number) => string or number`                                                   | Takes `id` or `key` or `_id` from `Item`, otherwise puts `Item` as key |
@@ -98,7 +100,7 @@ return (
 ## Events
 
 | Prop                                                             | Description                                                                                                                    | Type       |
-|------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|------------|
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------- |
 | onSwipeToClose()                                                 | Fired when user swiped to top/bottom                                                                                           | `Function` |
 | onTranslationYChange(translationY: number, shouldClose: boolean) | `'worklet';` Fired when user is swiping vertically to close the gallery                                                        | `Worklet`  |
 | onTap()                                                          | Fired when user tap on image                                                                                                   | `Function` |
@@ -115,13 +117,14 @@ import Gallery, { GalleryRef } from 'react-native-awesome-gallery';
 
 // ...
 
-const ref = useRef<GalleryRef>(null);
+const ref = useRef < GalleryRef > null;
 ```
 
-| Prop     | Description               | Type                                             |
-|----------|---------------------------|--------------------------------------------------|
-| setIndex | Sets active index         | `(newIndex: number, animated?: boolean) => void` |
-| reset    | Resets scale, translation | `(animated?: boolean) => void`                   |
+| Prop        | Description                                | Type                                                                  |
+| ----------- | ------------------------------------------ | --------------------------------------------------------------------- |
+| setIndex    | Sets active index                          | `(newIndex: number, animated?: boolean) => void`                      |
+| reset       | Resets scale, translation                  | `(animated?: boolean) => void`                                        |
+| moveToPoint | Animates the centre of the view to a point | `({ x:number, y:number, scale:number, autoScale: boolean }) => void;` |
 
 ## License
 
