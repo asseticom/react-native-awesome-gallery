@@ -482,7 +482,7 @@ const ResizableImage = React.memo(
         origin.x.value = adjustedFocal.x.value;
         origin.y.value = adjustedFocal.y.value;
       })
-      .onUpdate(({ scale: s, focalX, focalY, numberOfPointers }) => {
+      .onUpdate(({ scale: s, /*focalX, focalY,*/ numberOfPointers }) => {
         'worklet';
         if (!isActive.value) return;
         if (numberOfPointers !== 2) return;
@@ -496,7 +496,8 @@ const ResizableImage = React.memo(
 
         scale.value = nextScale;
 
-        setAdjustedFocal({ focalX, focalY });
+        //removed this line as per https://github.com/pavelbabenko/react-native-awesome-gallery/issues/83
+        // setAdjustedFocal({ focalX, focalY });
 
         translation.x.value =
           adjustedFocal.x.value +
