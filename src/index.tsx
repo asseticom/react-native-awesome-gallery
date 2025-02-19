@@ -482,7 +482,8 @@ const ResizableImage = React.memo(
         origin.x.value = adjustedFocal.x.value;
         origin.y.value = adjustedFocal.y.value;
       })
-      .onUpdate(({ scale: s, /*focalX, focalY,*/ numberOfPointers }) => {
+      //@ts-ignore - arguments ignored as per below issue
+      .onUpdate(({ scale: s, _, _, numberOfPointers }) => {
         'worklet';
         if (!isActive.value) return;
         if (numberOfPointers !== 2) return;
