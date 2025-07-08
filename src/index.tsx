@@ -482,7 +482,7 @@ function ResizableImageComponent<T extends any>(props: Props<T>) {
       origin.y.value = adjustedFocal.y.value;
     })
     //@ts-ignore - arguments ignored as per below issue
-    .onUpdate(({ scale: s, _, _, numberOfPointers }) => {
+    .onUpdate(({ scale: s, _a, _b, numberOfPointers }) => {
       'worklet';
       if (!isActive.value) return;
       if (numberOfPointers !== 2) return;
